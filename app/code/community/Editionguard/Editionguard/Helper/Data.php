@@ -11,9 +11,9 @@
  */
 class Editionguard_Editionguard_Helper_Data extends Mage_Core_Helper_Data
 {
-    const API_PACKAGE_URL                       = 'http://www.editionguard.com/api/package';
-    const API_SET_STATUS_URL                    = 'http://www.editionguard.com/api/set_status';
-    const API_DELETE_URL                        = 'http://www.editionguard.com/api/delete';
+    const API_PACKAGE_URL                       = 'http://staging.editionguard.com/api/package';
+    const API_SET_STATUS_URL                    = 'http://staging.editionguard.com/api/set_status';
+    const API_DELETE_URL                        = 'http://staging.editionguard.com/api/delete';
     const API_LINK_URL                          = 'http://acs4.editionguard.com/fulfillment/URLLink.acsm';
     const API_EBOOK_LISTING                     = 'http://www.editionguard.com/api/ebook_list'; //API for getting uploaded files
     
@@ -94,11 +94,13 @@ class Editionguard_Editionguard_Helper_Data extends Mage_Core_Helper_Data
                 // TODO: Map any documented error codes to more meaningful messages
                 // TODO: Use a custom exception type
                 throw new Editionguard_Editionguard_Model_Exception("Error: $error_type while uploading file to EditionGuard", $error_type, $error_url);
+                Mage::log("EditionGuard Error with returned XML: ".$xml);
             }
             else
             {
                 // TODO: Use a custom exception type
                 throw new Editionguard_Editionguard_Model_Exception("Unknown error while uploading file to EditionGuard");
+                Mage::log("EditionGuard Unknown error with XML: ".$xml);
             }
         }
 
@@ -203,10 +205,11 @@ class Editionguard_Editionguard_Helper_Data extends Mage_Core_Helper_Data
             )
         );
 
-        if (!isset($xml->resourceItemInfo))
+        if (!isset($xml->resourceItemInfo) && !isset($xml->response))
         {
             // Unknown response type. Assume it's a raw error.
-            throw new Exception("Error: \"$body\" while uploading file to EditionGuard test");
+            Mage::log("EditionGuard Error with returned XML: ".print_r($xml, true));
+            throw new Exception("Error: \"".$xml->error->getAttribute('data')."\" while uploading file to EditionGuard");
         }
 
         return array(
@@ -268,18 +271,28 @@ class Editionguard_Editionguard_Helper_Data extends Mage_Core_Helper_Data
         $sharedSecret = Mage::getStoreConfig(Editionguard_Editionguard_Helper_Data::XML_PATH_CONFIG_EDITIONGUARD_SECRET);
         $order_item = Mage::getModel('sales/order_item')->load($order_item_id);
         $order = Mage::getModel("sales/order")->load($order_item->order_id);
-        $transactionId = $order->getIncrementId()."-".$order_item_id;
+        $quantity = $order_item->QtyOrdered;
+        
+        $transactionId = $order->getIncrementId();
         $resourceId = $resource;
         $linkURL = Editionguard_Editionguard_Helper_Data::API_LINK_URL;
         $orderSource = Mage::getStoreConfig(Editionguard_Editionguard_Helper_Data::XML_PATH_CONFIG_EDITIONGUARD_EMAIL);
         
-        // Create download URL
-        $URL = "action=enterorder&ordersource=".urlencode($orderSource)."&orderid=".urlencode($transactionId)."&resid=".urlencode("$resourceId")."&dateval=".urlencode($dateval)."&gblver=4";
+        // If only one of the item was sold, simply generate direct download link
+        if($quantity == 1) {
+            // Create download URL
+            $URL = "action=enterorder&ordersource=".urlencode($orderSource)."&orderid=".urlencode($order_item_id)."&resid=".urlencode("$resourceId")."&dateval=".urlencode($dateval)."&gblver=4";
 
-        // Digitaly sign the request
-        $URL = $linkURL."?".$URL."&auth=".hash_hmac("sha1", $URL, base64_decode($sharedSecret));
-
-        return $URL;
+            // Digitaly sign the request
+            $URL = $linkURL."?".$URL."&auth=".hash_hmac("sha1", $URL, base64_decode($sharedSecret));
+            
+            return $URL;
+        }
+        // If more than one of the item has been sold, direct to download link listing page
+        else {
+            $hash = hash_hmac("sha1", $transactionId . $quantity . $orderSource, base64_decode($sharedSecret));
+            return "http://www.editionguard.com/api/mage_links/".urlencode($orderSource)."/".urlencode($transactionId)."/".urlencode($resourceId)."/".urlencode($quantity)."/$hash";
+        }
     }
     
 

@@ -38,23 +38,23 @@ class Editionguard_Editionguard_Model_Downloadable_Link extends Mage_Downloadabl
             {
                 // If enabling editionguard, we need to do this before updating the
                 // file. Otherwise the system will give errors.
-                if ($this->getEditionguardResource() && $add_editionguard)
-                {
-                    // had a resource, now re-enabling editionguard handling.
-                    try {
-                        $editionguard = Mage::helper('editionguard')->setResourceActive(
-                            $this->getEditionguardResource(),
-                            true
-                        );
-                    } catch (Editionguard_Editionguard_Model_Exception $e) {
-                        // Skip an error code that's getting returned right now in a non-error case
-                        if ($e->getCode() != 'E_ADEPT_INTERNAL')
-                        {
-                            // Got an error from EditionGuard. Can't save. Pass it on.
-                            throw $e;
-                        }
-                    }
-                }
+//                if ($this->getEditionguardResource() && $add_editionguard)
+//                {
+//                    // had a resource, now re-enabling editionguard handling.
+//                    try {
+//                        $editionguard = Mage::helper('editionguard')->setResourceActive(
+//                            $this->getEditionguardResource(),
+//                            true
+//                        );
+//                    } catch (Editionguard_Editionguard_Model_Exception $e) {
+//                        // Skip an error code that's getting returned right now in a non-error case
+//                        if ($e->getCode() != 'E_ADEPT_INTERNAL')
+//                        {
+//                            // Got an error from EditionGuard. Can't save. Pass it on.
+//                            throw $e;
+//                        }
+//                    }
+//                }
 
                 // Add or update the file
                 if ($new || $new_file || !$this->getEditionguardResource())
@@ -66,18 +66,30 @@ class Editionguard_Editionguard_Model_Downloadable_Link extends Mage_Downloadabl
                         $filedata = file_get_contents($filepath);
                         // Get the product object for its name
                         $product = Mage::getModel('catalog/product')->load($this->_data['product_id']);
-                        $editionguard = Mage::helper('editionguard')->sendToEditionguard(
-                            $this->getEditionguardResource(),
+                        
+                        // If we're uploading a file after link was set as remote eBook, don't send resource id
+                        if($this->getOrigData("link_type") != "ebook") {
+                            $editionguard = Mage::helper('editionguard')->sendToEditionguard($this->getEditionguardResource(),
                             $product->_data['name'],
                             basename($this->getLinkFile()),
-                            $filedata
-                        );
-    
+                            $filedata);
+                        }
+                        else {
+                            $editionguard = Mage::helper('editionguard')->sendToEditionguard(false,
+                            $product->_data['name'],
+                            basename($this->getLinkFile()),
+                            $filedata);
+                        }
+                        
                         // Remember the response information
-                        if($new) {
+                        if($new || $this->getOrigData("link_type") == "ebook") {
                             $this->setEditionguardResource($editionguard['resource']);
                             $this->setEditionguardSrc($editionguard['src']);
                         }
+                        
+                        // Always set link_type to ebook when using EditionGuard
+                        $this->setLinkType("ebook");
+
                     } catch (Editionguard_Editionguard_Model_Exception $e) {
                         // Got an error from EditionGuard. Can't save. Pass it on.
                         throw $e;
@@ -86,23 +98,23 @@ class Editionguard_Editionguard_Model_Downloadable_Link extends Mage_Downloadabl
             }
         }
 
-        if ($this->getEditionguardResource() && $remove_editionguard)
-        {   
-            // had a resource, now removing editionguard handling. Disable editionguard on the file.
-            try {
-                $editionguard = Mage::helper('editionguard')->setResourceActive(
-                    $this->getEditionguardResource(),
-                    false
-                );
-            } catch (Editionguard_Editionguard_Model_Exception $e) {
-                // Skip an error code that's getting returned right now in a non-error case
-                if ($e->getCode() != 'E_ADEPT_INTERNAL')
-                {
-                    // Got an error from EditionGuard. Can't save. Pass it on.
-                    throw $e;
-                }
-            }
-        }
+//        if ($this->getEditionguardResource() && $remove_editionguard)
+//        {   
+//            // had a resource, now removing editionguard handling. Disable editionguard on the file.
+//            try {
+//                $editionguard = Mage::helper('editionguard')->setResourceActive(
+//                    $this->getEditionguardResource(),
+//                    false
+//                );
+//            } catch (Editionguard_Editionguard_Model_Exception $e) {
+//                // Skip an error code that's getting returned right now in a non-error case
+//                if ($e->getCode() != 'E_ADEPT_INTERNAL')
+//                {
+//                    // Got an error from EditionGuard. Can't save. Pass it on.
+//                    throw $e;
+//                }
+//            }
+//        }
         return parent::_beforeSave();
     }
     
@@ -111,24 +123,24 @@ class Editionguard_Editionguard_Model_Downloadable_Link extends Mage_Downloadabl
      *
      * @return Mage_Downloadable_Model_Link
      */
-    protected function _beforeDelete()
-    {
-        $this->_ensureOrigData();
-
-        if ($this->getEditionguardResource())
-        {
-            // Had a resource. Delete it.
-            try {
-                $editionguard = Mage::helper('editionguard')->deleteResource(
-                    $this->getEditionguardResource()
-                );
-            } catch (Editionguard_Editionguard_Model_Exception $e) {
-                // Got an error from EditionGuard. Can't save. Pass it on.
-                throw $e;
-            }
-        }
-        return parent::_beforeDelete();
-    }
+//    protected function _beforeDelete()
+//    {
+//        $this->_ensureOrigData();
+//
+//        if ($this->getEditionguardResource())
+//        {
+//            // Had a resource. Delete it.
+//            try {
+//                $editionguard = Mage::helper('editionguard')->deleteResource(
+//                    $this->getEditionguardResource()
+//                );
+//            } catch (Editionguard_Editionguard_Model_Exception $e) {
+//                // Got an error from EditionGuard. Can't save. Pass it on.
+//                throw $e;
+//            }
+//        }
+//        return parent::_beforeDelete();
+//    }
     
     protected function _beforeLoad($id, $field = null)
     {

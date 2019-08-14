@@ -39,12 +39,15 @@ class Editionguard_Editionguard_Block_Downloadable_Customer_Products_List extend
     {
         if (Mage::helper('editionguard')->getUseEditionguard($item))
         {
-            Mage::log(print_r($item, true));
             return Mage::helper('editionguard')->getDownloadUrl($item->getOrderItemId(), $item->getEditionguardResource());
         }
         else
         {
             return parent::getDownloadUrl($item);
         }
+    }
+    
+    public function getItems() {
+        return null;
     }
 }
