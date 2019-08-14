@@ -22,16 +22,17 @@ class Editionguard_Editionguard_Model_Downloadable_Link extends Mage_Downloadabl
      * @return Mage_Downloadable_Model_Link
      */
     protected function _beforeSave()
-    {
+    {               
         $new = !$this->getLinkId();
         $add_editionguard = $this->_addingEditionguard;
         $remove_editionguard = $this->_removingEditionguard;
         $new_file = $this->_changingLinkFile;
-
+        $type = $this->getLinkType();
         $this->_ensureOrigData();
         
-        if ($new || $add_editionguard || $new_file)
+        if (($new || $add_editionguard || $new_file) && $type != 'ebook')
         {
+      
             // The file is new to editionguard.
             if (Mage::helper('editionguard')->getUseEditionguard($this))
             {
@@ -86,7 +87,7 @@ class Editionguard_Editionguard_Model_Downloadable_Link extends Mage_Downloadabl
         }
 
         if ($this->getEditionguardResource() && $remove_editionguard)
-        {
+        {   
             // had a resource, now removing editionguard handling. Disable editionguard on the file.
             try {
                 $editionguard = Mage::helper('editionguard')->setResourceActive(
@@ -131,7 +132,7 @@ class Editionguard_Editionguard_Model_Downloadable_Link extends Mage_Downloadabl
     
     protected function _beforeLoad($id, $field = null)
     {
-        $this->_loading = true;
+        $this->_loading = true;  
         return parent::_beforeLoad($id, $field);
     }
     
@@ -142,10 +143,10 @@ class Editionguard_Editionguard_Model_Downloadable_Link extends Mage_Downloadabl
     }
     
     public function setData($key, $value=null)
-    {
-        if (!$this->_loading && is_array($key))
-        {
-            if (isset($key['use_editionguard']))
+    {    
+       if (!$this->_loading && is_array($key))
+        {          
+            if (isset($key['use_editionguard']) && $key['type']!='ebook')
             {
                 $use_editionguard = $key['use_editionguard'];
                 unset($key['use_editionguard']);
@@ -159,19 +160,23 @@ class Editionguard_Editionguard_Model_Downloadable_Link extends Mage_Downloadabl
             if (isset($use_editionguard))
             {
                 $this->setUseEditionguard($use_editionguard);
+                //  
+               // $this->listResource();
+                
             }
             if (isset($link_file))
             {
                 $this->setLinkFile($link_file);
-            }
+            } 
             return $this;
         }
 
         return parent::setData($key, $value);
+        
     }
-    
-    public function setUseEditionguard($v)
-    {
+    //
+    public function setListingEditionguard($v)
+    {   
         $this->_ensureOrigData();
 
         if ($v && $v != $this->getOrigData('use_editionguard'))
@@ -186,9 +191,28 @@ class Editionguard_Editionguard_Model_Downloadable_Link extends Mage_Downloadabl
         }
         return $this->setData('use_editionguard', $v);
     }
+    
+    public function setUseEditionguard($v)
+    {          
+        $this->_ensureOrigData();
+        
+        if ($v && $v != $this->getOrigData('use_editionguard'))
+        {
+            $this->_addingEditionguard = true;
+            $this->_removingEditionguard = false;
+        }
+        else if (!$v && $v != $this->getOrigData('use_editionguard'))
+        {
+            $this->_addingEditionguard = false;
+            $this->_removingEditionguard = true;
+        }  
+       
+        return $this->setData('use_editionguard', $v);
+        
+    }
 
     public function setLinkFile($v)
-    {
+    {        
         $this->_ensureOrigData();
 
         if ($v && $v != $this->getOrigData('link_file'))
@@ -202,7 +226,7 @@ class Editionguard_Editionguard_Model_Downloadable_Link extends Mage_Downloadabl
     }
 
     protected function _ensureOrigData()
-    {
+    {    
         // Magento doesn't always load the object. We need to delay load it to get the old values.
         if ($this->getLinkId() && !$this->getOrigData())
         {

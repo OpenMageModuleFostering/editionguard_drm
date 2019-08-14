@@ -15,6 +15,8 @@ class Editionguard_Editionguard_Helper_Data extends Mage_Core_Helper_Data
     const API_SET_STATUS_URL                    = 'http://www.editionguard.com/api/set_status';
     const API_DELETE_URL                        = 'http://www.editionguard.com/api/delete';
     const API_LINK_URL                          = 'http://acs4.editionguard.com/fulfillment/URLLink.acsm';
+    const API_EBOOK_LISTING                     = 'http://www.editionguard.com/api/ebook_list'; //API for getting uploaded files
+    
     const LINK_EDITIONGUARD_YES                 = 1;
     const LINK_EDITIONGUARD_NO                  = 0;
     const LINK_EDITIONGUARD_CONFIG              = 2;
@@ -74,6 +76,7 @@ class Editionguard_Editionguard_Helper_Data extends Mage_Core_Helper_Data
             $body = $response->getRawBody();
         }
     
+    //echo 'xml->';echo '<pre>'; print_r($body); die();
         try {
             $xml = new Varien_Simplexml_Element("<root>".$body."</root>");
         } catch (Exception $e) {
@@ -101,6 +104,76 @@ class Editionguard_Editionguard_Helper_Data extends Mage_Core_Helper_Data
 
         return $xml;
     }
+    
+    /**
+     * Given a URL and parameters, makes a request to the editionguard API using the
+     * currently configured credentials.
+     * 
+     * @param string $request_url
+     * @param array $params
+     * 
+     * @return Varien_Simplexml_Element jSon object containing the result
+     * @throws Exception on failure
+     */
+    protected function _sendEditionguardApiRequestJson($request_url, array $params, $file = null)
+    {
+        $secret = Mage::getStoreConfig(Editionguard_Editionguard_Helper_Data::XML_PATH_CONFIG_EDITIONGUARD_SECRET);
+        $email = Mage::getStoreConfig(Editionguard_Editionguard_Helper_Data::XML_PATH_CONFIG_EDITIONGUARD_EMAIL);
+        $nonce = rand(1000000, 999999999);
+        $hash = hash_hmac("sha1", $nonce.$email, base64_decode($secret));
+    
+        $httpClient = new Varien_Http_Client();
+        $params['email'] = $email;
+        $params['nonce'] = $nonce;
+        $params['hash'] = $hash;
+    
+        $httpClient->setUri($request_url)
+            ->setParameterPost($params)
+            ->setConfig(array('timeout' => 3600));
+        
+        if ($file && is_array($file))
+        {
+            $httpClient->setFileUpload(
+                $file['filename'],
+                $file['formname'],
+                $file['data'],
+                $file['type']
+            );
+        }
+
+        $response = $httpClient->request('POST');
+        
+        // TODO: Handle non 200 responses
+        // - Follow 3**
+        // - Give errors on 4** and 5**
+    
+        try {
+            $body = $response->getBody();
+        } catch (Zend_Http_Exception $e) {
+            // HACK: EditionGuard currently sends the response raw, even though
+            // the header indicates that it is chunked. Just grab the raw body
+            // and use it.
+            $body = $response->getRawBody();
+        }
+    
+
+        $bodyDecoded = json_decode($body);
+        return $bodyDecoded;
+    }
+    
+    
+    /**
+     * Collects an Editionguard resources already uploaded files
+     */
+    public function listResource($resourceid)
+    {
+        $decoded_reponse = $this->_sendEditionguardApiRequestJson(Editionguard_Editionguard_Helper_Data::API_EBOOK_LISTING, array(
+            'resource_id'=>$resourceid,
+        ));
+        
+        return $decoded_reponse;
+    }
+    
 
     /**
      * Sends a file to Editionguard for DRM handling
@@ -133,7 +206,7 @@ class Editionguard_Editionguard_Helper_Data extends Mage_Core_Helper_Data
         if (!isset($xml->resourceItemInfo))
         {
             // Unknown response type. Assume it's a raw error.
-            throw new Exception("Error: \"$body\" while uploading file to EditionGuard");
+            throw new Exception("Error: \"$body\" while uploading file to EditionGuard test");
         }
 
         return array(

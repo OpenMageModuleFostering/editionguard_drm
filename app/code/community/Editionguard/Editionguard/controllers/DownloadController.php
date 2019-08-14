@@ -17,6 +17,7 @@ class Editionguard_Editionguard_DownloadController extends Mage_Downloadable_Dow
      */
     public function linkAction()
     {
+    
         $id = $this->getRequest()->getParam('id', 0);
         $linkPurchasedItem = Mage::getModel('downloadable/link_purchased_item')->load($id, 'link_hash');
         if (! $linkPurchasedItem->getId() ) {
@@ -74,7 +75,7 @@ class Editionguard_Editionguard_DownloadController extends Mage_Downloadable_Dow
                 $resourceType = Mage_Downloadable_Helper_Download::LINK_TYPE_FILE;
             }
             try {
-                
+                  
                 $editionguard_url = Mage::helper('editionguard')->getDownloadUrl($linkPurchasedItem->getOrderItemId(), $linkPurchasedItem->getEditionguardResource());
 
                 $linkPurchasedItem->setNumberOfDownloadsUsed($linkPurchasedItem->getNumberOfDownloadsUsed() + 1);

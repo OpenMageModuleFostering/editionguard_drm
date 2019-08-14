@@ -46,7 +46,9 @@ class Editionguard_Editionguard_Block_Downloadable_Adminhtml_Catalog_Product_Edi
                 'sample_file' => $item->getSampleFile(),
                 'sample_url' => $item->getSampleUrl(),
                 'sample_type' => $item->getSampleType(),
+                'editionguard_resource'=> $item->getEditionguardResource(),
                 'sort_order' => $item->getSortOrder(),
+                
             );
             $file = Mage::helper('downloadable/file')->getFilePath(
                 Mage_Downloadable_Model_Link::getBasePath(), $item->getLinkFile()
@@ -92,7 +94,7 @@ class Editionguard_Editionguard_Block_Downloadable_Adminhtml_Catalog_Product_Edi
                 $tmpLinkItem['website_price'] = $item->getWebsitePrice();
             }
             $linkArr[] = new Varien_Object($tmpLinkItem);
-        }
+        } 
         return $linkArr;
     }
 }

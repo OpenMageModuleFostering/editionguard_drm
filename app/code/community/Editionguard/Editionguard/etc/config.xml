@@ -14,7 +14,7 @@
 <config>
     <modules>
         <Editionguard_Editionguard>
-            <version>1.0.0.3</version>
+            <version>1.0.1.1</version>
         </Editionguard_Editionguard>
     </modules>
     <frontend>
