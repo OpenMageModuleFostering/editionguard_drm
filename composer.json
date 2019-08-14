@@ -1,0 +1,16 @@
+{
+    "name": "OpenMageModuleFostering/editionguard_drm",
+    "type": "magento-module",
+    "license": "New-BSD",
+    "homepage": "",
+    "description": "This extension is used to integrate Magento with EditionGuard, a cost-effective Adobe DRM service for eBooks.",
+    "authors": [
+    {
+        "name": "EditionGuard",
+        "email": "support@editionguard.com"
+    }
+],
+    "suggest": {
+        "magento-hackathon/magento-composer-installer": "*"
+    }
+}

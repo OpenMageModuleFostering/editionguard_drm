@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package>
+    <name>editionguard_drm</name>
+    <version>1.0.0.3</version>
+    <stability>stable</stability>
+    <license>New BSD</license>
+    <channel>community</channel>
+    <extends/>
+    <summary>This extension is used to integrate Magento with EditionGuard, a cost-effective Adobe DRM service for eBooks.</summary>
+    <description>This extension will allow you to create eBooks protected with the industry standard Adobe Content Server 4 DRM through the EditionGuard APIs. Through the admin interface, you will be able to manage your DRM enabled eBooks and put them up for sale as Downloadable Products. Your clients will then be able to purchase your eBooks, download them securely on the frontend and open them in Adobe Digital Editions.</description>
+    <notes>Increased API call timeouts to one hour so large file uploads can be accommodated.</notes>
+    <authors><author><name>EditionGuard</name><user>EditionGuard</user><email>support@editionguard.com</email></author></authors>
+    <date>2013-09-21</date>
+    <time>11:12:34</time>
+    <contents><target name="magecommunity"><dir><dir name="Editionguard"><dir name="Editionguard"><dir name="Block"><dir name="Downloadable"><dir name="Adminhtml"><dir name="Catalog"><dir name="Product"><dir name="Edit"><dir name="Tab"><dir name="Downloadable"><file name="Links.php" hash="d5cc57710639854da0b3af6924195b8c"/></dir></dir></dir></dir></dir></dir><dir name="Customer"><dir name="Products"><file name="List.php" hash="d6ed16a7183e3e97e3725d39d87c4c37"/></dir></dir></dir></dir><dir name="Helper"><file name="Data.php" hash="ab37a425f2aa78219a15075ce9109a34"/></dir><dir name="Model"><dir name="Downloadable"><file name="Link.php" hash="85bec88744d31a81853c8e76c3ff55c6"/></dir><file name="Exception.php" hash="18afd5abedb9a0413481ea5255a89a53"/><dir name="Mysql4"><dir name="Editionguard"><file name="Collection.php" hash="de7c2d9c3aa413612a6473dafdf2f779"/></dir><file name="Editionguard.php" hash="adaa5e0d1718f506e89c657420c4d31a"/></dir><dir name="Resource"><dir name="Downloadable"><file name="Link.php" hash="cfc4b1417f2fd0adf93daf15b24681e1"/></dir><dir name="Eav"><dir name="Mysql4"><file name="Setup.php" hash="ff76c3213b9b428220578ba48a667365"/></dir></dir></dir></dir><dir name="controllers"><file name="DownloadController.php" hash="22ef464060c9ffb33b9f031e9ece1752"/></dir><dir name="etc"><file name="config.xml" hash="bfd50698223bb0df94df2bda2e2a78a9"/><file name="system.xml" hash="e1a700fb181b7b11e318edd4612d93e3"/></dir><dir name="sql"><dir name="editionguard_setup"><file name="install-1.0.0.0.php" hash="9e9ccd8e5fb5f5f63b32fa6ccea92ce6"/></dir></dir></dir></dir></dir></target><target name="magedesign"><dir><dir name="adminhtml"><dir name="default"><dir name="default"><dir name="template"><dir name="editionguard"><dir name="downloadable"><dir name="product"><dir name="edit"><dir name="downloadable"><file name="links.phtml" hash="f2d9b8635fd3ea05e23f62ee5e916782"/></dir></dir></dir></dir></dir></dir></dir></dir></dir></dir></target><target name="mageetc"><dir><dir name="modules"><file name="Editionguard_Editionguard.xml" hash="1d6aac7609bf2b57392b64213f3722ca"/></dir></dir></target></contents>
+    <compatible/>
+    <dependencies><required><php><min>5.2.17</min><max>6.0.0</max></php></required></dependencies>
+</package>
