@@ -1,3 +1,5 @@
+
+
 ## Original Package Description
 
 This extension is used to integrate Magento with EditionGuard, a cost-effective Adobe DRM service for eBooks.
